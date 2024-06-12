@@ -2,9 +2,9 @@ import std/[httpclient, strformat, json, os, strutils]
 from std/base64 import nil
 
 const
-  clientId = "52c80acd57ec44aeb6748dec514b1498"
-  clientSecret = "b567f1eaf15d48a7b125a9bdad011a63"
-  playlistId = "2Lljruz9KZdiCHnzaybtpk"
+  clientId = ""
+  clientSecret = ""
+  playlistId = ""
 
 createDir("y")
 
