@@ -88,13 +88,14 @@ for (rowCount, row) in rows.pairs(reversed = true):
 
   var stichesCount = 0 # Sections of kind stitches
   var quarterCount = 0
+  var stitchesPerQuarterCount = 0
   for (colCount, col) in row.pairs(reversed = rowCount mod 2 == 0):
     case col.kind
     of skStitches:
       if col.color notin colorsTable:
         echo &"unknown color at {stichesCount+col.repeated-1}, {rowCount}: {col.color}"
 
-      pattern.add &"{' '.repeat(6)}In {col.color.str}"
+      pattern.add &"{' '.repeat(6)}{stitchesPerQuarterCount+1}. In {col.color.str}"
 
       if rowCount == 0 and colCount == 0: # First row and first column
         pattern.add &", ch{image.width+1}, sk ch"
@@ -104,8 +105,10 @@ for (rowCount, row) in rows.pairs(reversed = true):
       pattern.add &", sc{col.repeated}\n"
 
       inc stichesCount
+      inc stitchesPerQuarterCount
     of skQuarter:
       #pattern.add &"\n  {((col.quarter + 1) * (image.width div 4))}/{image.width} completed"
+      stitchesPerQuarterCount = 0
       if quarterCount >= 4:
         #pattern.add "\n"
         break
