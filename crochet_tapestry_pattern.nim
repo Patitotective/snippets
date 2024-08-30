@@ -70,13 +70,16 @@ iterator pairs[T](s: openArray[T], reversed: bool): (int, T) =
 
 let image = readImage("/home/cristobal/Sync/Chu chu song 128.png")
 var rows = newSeq[seq[Section]]()
+var lastUsageOf = initTable[ColorRGBX, int]() # Where is the last usage of each color
 
 for y in 0..<image.height:
-  #if y > 10: continue
   var row = @[quarter()]
 
   for x in 0..<image.width:
     let pxc = image[x, y]
+
+    if pxc notin lastUsageOf:
+      lastUsageOf[pxc] = (image.height - 1) - y
 
     # If the pixel before this one is the same color increase the previous stitch's repeated
     if row.len > 0 and row[^1].kind == skStitches and 
@@ -134,7 +137,26 @@ for (rowCount, row) in rows.pairs(reversed = true):
       part.add &"{' '.repeat(4)}- {quarterCount+1}/4\n"
       inc quarterCount
 
-  if rowCount == rows.high or ((rowCount+1) mod rowsSep == 0): # or rowCount == 15
+  if rowCount == rows.high or ((rowCount+1) mod rowsSep == 0):
+    var lastColors = newSeq[ColorRGBX]()
+    var lastColorsText = ""
+    for col, lastUsage in lastUsageOf:
+      if lastUsage + rowsSep < rowCount: # Last colors must be from minimum a rowsSep distance away
+        lastColors.add col
+  
+    for c in lastColors:
+      lastUsageOf.del c
+
+    if lastColors.len > 0:
+      let c =
+        if lastColors.len == 1: "color"
+        else: "colors"
+      let itsTheyre =
+        if lastColors.len == 1: "it's"
+        else: "they're"
+
+      lastColorsText.add &"  - You can cut the {c} {lastColors.toSeq.joinButLast(\", \", \" and \")} since {itsTheyre} not going to be used anymore.\n"
+
     var newColorsText = ""
     let newColors = partColors - usedColors
 
@@ -151,7 +173,7 @@ for (rowCount, row) in rows.pairs(reversed = true):
       usedColors.incl partColors
       partColors.clear()
 
-    pattern.add newColorsText & part
+    pattern.add lastColorsText & newColorsText & part
     part.setLen(0)
 
 echo pattern
